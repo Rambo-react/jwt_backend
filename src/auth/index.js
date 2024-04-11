@@ -6,6 +6,7 @@ const {
   getTokens,
   refreshTokenAge,
   verifyAuthorizationMiddleWare,
+  verifyRefreshTokenMiddleware,
 } = require('./utils')
 
 const authRouter = express.Router()
@@ -34,6 +35,23 @@ authRouter.post('/login', (req, res) => {
   res.send({ accessToken })
 })
 
+authRouter.get('/refresh', verifyRefreshTokenMiddleware, (req, res) => {
+  const { accessToken, refreshToken } = getTokens(req.user.login)
+
+  res.setHeader(
+    'Set-Cookie',
+    cookie.serialize('refreshToken', refreshToken, {
+      httpOnly: true,
+      maxAge: 1000 * 60 * 60,
+    })
+  )
+  res.send({ accessToken })
+})
+
+authRouter.get('/profile', verifyAuthorizationMiddleWare, (req, res) => {
+  res.send('admin')
+})
+
 authRouter.get('/logout', (req, res) => {
   res.setHeader(
     'Set-Cookie',
@@ -43,10 +61,6 @@ authRouter.get('/logout', (req, res) => {
     })
   )
   res.sendStatus(200)
-})
-
-authRouter.get('/profile', verifyAuthorizationMiddleWare, (req, res) => {
-  res.send('admin')
 })
 
 module.exports = authRouter

@@ -6,6 +6,25 @@ const signatureRefresh = 'MySup3R_z3kr3t_refresh'
 const accessTokenAge = 20 //20 sec
 const refreshTokenAge = 60 * 60 // 1 hour
 
+const verifyAuthorizationMiddleWare = (req, res, next) => {
+  const token = req.headers.authorization
+    ? req.headers.authorization.split(' ')[1]
+    : ''
+
+  if (!token) {
+    return res.sendStatus(401)
+  }
+
+  try {
+    const decoded = jwt.verify(token, signatureAccess)
+    req.user = decoded
+  } catch (err) {
+    return res.sendStatus(401)
+  }
+
+  return next()
+}
+
 const getTokens = (login) => ({
   accessToken: jwt.sign({ login }, signatureAccess, {
     expiresIn: `${accessTokenAge}s`,
@@ -15,4 +34,4 @@ const getTokens = (login) => ({
   }),
 })
 
-module.exports = { getTokens }
+module.exports = { getTokens, verifyAuthorizationMiddleWare, refreshTokenAge }

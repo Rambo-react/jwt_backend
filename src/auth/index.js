@@ -2,7 +2,11 @@ const express = require('express')
 const CryptoJS = require('crypto-js')
 const cookie = require('cookie')
 const { passwordSecret, fakeUser } = require('./data')
-const { getTokens, refreshTokenAge } = require('./utils')
+const {
+  getTokens,
+  refreshTokenAge,
+  verifyAuthorizationMiddleWare,
+} = require('./utils')
 
 const authRouter = express.Router()
 
@@ -39,6 +43,10 @@ authRouter.get('/logout', (req, res) => {
     })
   )
   res.sendStatus(200)
+})
+
+authRouter.get('/profile', verifyAuthorizationMiddleWare, (req, res) => {
+  res.send('admin')
 })
 
 module.exports = authRouter
